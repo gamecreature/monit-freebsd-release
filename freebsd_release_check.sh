@@ -1,6 +1,6 @@
 #!/bin/sh
 FREEBSD_UPDATE_CONF="/etc/freebsd-update.conf"
-FREEBSD_UPDATE_PUB_SSL="${FREEBSD_UPDATE_PUB_SSL:-/var/db/zabbix/freebsd-update-pub.ssl}"
+FREEBSD_UPDATE_PUB_SSL="${FREEBSD_UPDATE_PUB_SSL:-/var/db/freebsd-update/pub.ssl}"
 
 set -o pipefail
 
@@ -49,13 +49,19 @@ check_update()
 	patchlevel="$4"
 	eol="$6"
 
+	running="`freebsd-version`"
+	latest="$rel-p$patchlevel"
 	cat << EOF
 {
-    "running": "`freebsd-version`",
-    "latest": "$rel-p$patchlevel",
+    "running": "$running",
+    "latest": "$latest",
     "eol": $eol
 }
 EOF
+
+	if [ "$running" != "$latest" ]; then
+		exit 1
+	fi
 	exit 0
 }
 
